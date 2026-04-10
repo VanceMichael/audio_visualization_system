@@ -1,0 +1,262 @@
+@use './variables.scss' as *;
+
+// ========================================
+// 全局重置与基础样式
+// ========================================
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: $font-family;
+  font-size: $font-size-md;
+  color: $text-primary;
+  background: $bg-darker;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+#app {
+  height: 100%;
+}
+
+// ========================================
+// 选择文本样式
+// ========================================
+
+::selection {
+  background: rgba($primary-color, 0.4);
+  color: $text-primary;
+}
+
+// ========================================
+// Element Plus 深度定制
+// ========================================
+
+:root {
+  --el-color-primary: #{$primary-color};
+  --el-color-primary-light-3: #{$primary-light};
+  --el-color-primary-dark-2: #{$primary-dark};
+  --el-bg-color: transparent;
+  --el-bg-color-overlay: #{$bg-card};
+  --el-text-color-primary: #{$text-primary};
+  --el-text-color-regular: #{$text-secondary};
+  --el-border-color: #{$border-color};
+  --el-fill-color-blank: #{$bg-input};
+  --el-border-radius-base: #{$radius-sm};
+}
+
+// 按钮样式
+.el-button {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border: none;
+  transition: all $transition-normal;
+  
+  &--primary {
+    background: $primary-gradient;
+    box-shadow: $shadow-glow-primary;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 60px rgba($primary-color, 0.5);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// 滑块样式
+.el-slider {
+  --el-slider-main-bg-color: #{$primary-color};
+  --el-slider-runway-bg-color: #{rgba(255, 255, 255, 0.1)};
+  --el-slider-button-size: 14px;
+  
+  .el-slider__runway {
+    height: 4px;
+    border-radius: $radius-full;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+  }
+  
+  .el-slider__bar {
+    height: 4px;
+    border-radius: $radius-full;
+    background: linear-gradient(90deg, $accent-cyan, $primary-color);
+  }
+  
+  .el-slider__button-wrapper {
+    .el-slider__button {
+      width: 14px;
+      height: 14px;
+      border: none;
+      background: $text-primary;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: all $transition-fast;
+    }
+    
+    &:hover .el-slider__button {
+      transform: scale(1.2);
+      box-shadow: $shadow-glow-primary;
+    }
+  }
+}
+
+// 消息提示
+.el-message {
+  background: $bg-glass !important;
+  backdrop-filter: $glass-blur;
+  border: $glass-border !important;
+  border-radius: $radius-lg !important;
+  box-shadow: $shadow-lg !important;
+  
+  .el-message__content {
+    color: $text-primary !important;
+    font-weight: 500;
+  }
+  
+  .el-message__icon {
+    font-size: 18px;
+  }
+  
+  &--success .el-message__icon {
+    color: $accent-green !important;
+  }
+  
+  &--error .el-message__icon {
+    color: $accent-pink !important;
+  }
+}
+
+// ========================================
+// 滚动条样式
+// ========================================
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-full;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+// ========================================
+// 通用动画
+// ========================================
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba($primary-color, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba($primary-color, 0.6), 0 0 60px rgba($accent-cyan, 0.3);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// 动画类
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-glow { animation: glow 2s ease-in-out infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-shimmer { 
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+.animate-rotate { animation: rotate 1s linear infinite; }
+.animate-fadeIn { animation: fadeIn 0.5s $ease-out-expo forwards; }
+.animate-scaleIn { animation: scaleIn 0.3s $ease-out-expo forwards; }
+.animate-slideUp { animation: slideUp 0.5s $ease-out-expo forwards; }
+
+// ========================================
+// 毛玻璃效果
+// ========================================
+
+.glass {
+  background: $glass-bg;
+  backdrop-filter: $glass-blur;
+  -webkit-backdrop-filter: $glass-blur;
+  border: $glass-border;
+}
+
+// ========================================
+// 渐变文字
+// ========================================
+
+.gradient-text {
+  background: linear-gradient(135deg, $text-primary 0%, $accent-cyan 50%, $primary-light 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ========================================
+// 霓虹发光效果
+// ========================================
+
+.neon-glow {
+  text-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+}

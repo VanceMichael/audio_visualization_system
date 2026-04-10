@@ -1,0 +1,25 @@
+services:
+  audio-visualizer:
+    build:
+      context: ./frontend-user
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: audio-visualizer
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "project=audio-visualizer"
+      - "label=label-01707"
+
+networks:
+  default:
+    name: audio-visualizer-network
