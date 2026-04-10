@@ -97,6 +97,7 @@ export const useAudioStore = defineStore('audio', () => {
     isPlaying.value = false
     currentTime.value = 0
     duration.value = 0
+    isLoading.value = false
   }
 
   return {
