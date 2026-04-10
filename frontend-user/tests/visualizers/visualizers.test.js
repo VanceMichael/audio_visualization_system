@@ -261,6 +261,58 @@ describe('Visualizers', () => {
             visualizer.render(frequencyData, waveformData, 0.016, false)
           }).not.toThrow()
         })
+
+        it('should handle empty frequency data with all zeros without crashing', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          const zeroData = new Uint8Array(1024).fill(0)
+          expect(() => {
+            visualizer.render(zeroData, zeroData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should handle single value frequency data', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          const smallData = new Uint8Array(1).fill(128)
+          expect(() => {
+            visualizer.render(smallData, smallData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should handle extreme frequency values (0 and 255)', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          const minFreqData = new Uint8Array(1024).fill(0)
+          const maxFreqData = new Uint8Array(1024).fill(255)
+          expect(() => {
+            visualizer.render(minFreqData, minFreqData, 0.016, true)
+          }).not.toThrow()
+          expect(() => {
+            visualizer.render(maxFreqData, maxFreqData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should handle deltaTime = 0 without crashing', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, 0, true)
+          }).not.toThrow()
+        })
+
+        it('should handle negative deltaTime without crashing', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, -0.016, true)
+          }).not.toThrow()
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, -1000, true)
+          }).not.toThrow()
+        })
+
+        it('should handle very large deltaTime values', () => {
+          const visualizer = new Class(mockCanvas, mockCtx)
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, 1000, true)
+          }).not.toThrow()
+        })
       })
     })
   })
