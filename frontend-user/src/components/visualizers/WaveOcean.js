@@ -47,18 +47,21 @@ export class WaveOcean {
   }
 
   render(frequencyData, waveformData, deltaTime, isPlaying) {
+    const safeFrequencyData = frequencyData || new Uint8Array(1024)
+    const safeDeltaTime = Math.max(0, deltaTime || 0)
+    
     const ctx = this.ctx
     
     // 使用 deltaTime 更新时间，确保动画速度与帧率无关
-    this.time += deltaTime
+    this.time += safeDeltaTime
     
     let avgFrequency = 0, bassFrequency = 0
-    for (let i = 0; i < frequencyData.length; i++) {
-      avgFrequency += frequencyData[i]
-      if (i < frequencyData.length / 4) bassFrequency += frequencyData[i]
+    for (let i = 0; i < safeFrequencyData.length; i++) {
+      avgFrequency += safeFrequencyData[i]
+      if (i < safeFrequencyData.length / 4) bassFrequency += safeFrequencyData[i]
     }
-    avgFrequency /= frequencyData.length
-    bassFrequency /= (frequencyData.length / 4)
+    avgFrequency /= safeFrequencyData.length || 1
+    bassFrequency /= (safeFrequencyData.length / 4) || 1
     
     const intensity = isPlaying ? avgFrequency / 128 : 0.3
     const bassIntensity = isPlaying ? bassFrequency / 128 : 0.3
@@ -76,7 +79,7 @@ export class WaveOcean {
     this.drawStars(ctx, intensity)
     
     // 粒子 - 传入 deltaTime
-    this.updateParticles(ctx, intensity, deltaTime)
+    this.updateParticles(ctx, intensity, safeDeltaTime)
 
     // 月亮/光源
     this.drawMoon(ctx, intensity)
@@ -88,7 +91,8 @@ export class WaveOcean {
 
     // 波形线
     if (isPlaying) {
-      this.drawWaveform(ctx, waveformData, intensity)
+      const safeWaveformData = waveformData || new Uint8Array(1024)
+      this.drawWaveform(ctx, safeWaveformData, intensity)
     }
 
     // 底部渐变

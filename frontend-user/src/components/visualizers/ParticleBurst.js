@@ -112,6 +112,10 @@ export class ParticleBurst {
   }
 
   render(frequencyData, waveformData, deltaTime, isPlaying) {
+    const safeFrequencyData = frequencyData || new Uint8Array(1024)
+    const safeWaveformData = waveformData || new Uint8Array(1024)
+    const safeDeltaTime = Math.max(0, deltaTime || 0)
+    
     const ctx = this.ctx
     const w = this.width
     const h = this.height
@@ -119,16 +123,16 @@ export class ParticleBurst {
     const cy = h / 2
     
     // 使用 deltaTime 更新时间
-    this.time += deltaTime
+    this.time += safeDeltaTime
     
     // 基准速度乘数（将 deltaTime 转换为 60fps 等效）
-    const dtScale = deltaTime * 60
+    const dtScale = safeDeltaTime * 60
 
     // 音频分析
     let bass = 0, mid = 0, high = 0, avg = 0
-    const len = frequencyData.length
+    const len = safeFrequencyData.length
     for (let i = 0; i < len; i++) {
-      const val = frequencyData[i]
+      const val = safeFrequencyData[i]
       avg += val
       if (i < len * 0.12) bass += val
       else if (i < len * 0.4) mid += val
@@ -322,7 +326,7 @@ export class ParticleBurst {
       for (let i = 0; i < bars; i++) {
         const angle = (i / bars) * Math.PI * 2 - Math.PI / 2
         const fi = Math.floor((i / bars) * len * 0.5)
-        const val = frequencyData[fi] / 255
+        const val = safeFrequencyData[fi] / 255
         const barLen = 25 + val * 80 * intensity
 
         const x1 = cx + Math.cos(angle) * outerR
@@ -347,7 +351,7 @@ export class ParticleBurst {
       for (let i = 0; i < bars / 2; i++) {
         const angle = (i / (bars / 2)) * Math.PI * 2 + Math.PI / 2 + this.time * 0.5
         const fi = Math.floor((i / (bars / 2)) * len * 0.3)
-        const val = frequencyData[fi] / 255
+        const val = safeFrequencyData[fi] / 255
         const barLen = 10 + val * 30 * intensity
 
         const x1 = cx + Math.cos(angle) * innerR
