@@ -68,21 +68,25 @@ export class StarryNight {
   }
 
   render(frequencyData, waveformData, deltaTime, isPlaying) {
+    const safeFrequencyData = frequencyData || new Uint8Array(1024)
+    const safeWaveformData = waveformData || new Uint8Array(1024)
+    const safeDeltaTime = Math.max(0, deltaTime || 0)
+    
     const ctx = this.ctx
     const centerX = this.width / 2
     const centerY = this.height / 2
     
     // 使用 deltaTime 更新时间
-    this.time += deltaTime
+    this.time += safeDeltaTime
     
     // 基准速度乘数
-    const dtScale = deltaTime * 60
+    const dtScale = safeDeltaTime * 60
 
     // 计算音频强度
     let bass = 0, mid = 0, high = 0, avg = 0
-    const len = frequencyData.length
+    const len = safeFrequencyData.length
     for (let i = 0; i < len; i++) {
-      const val = frequencyData[i]
+      const val = safeFrequencyData[i]
       avg += val
       if (i < len * 0.15) bass += val
       else if (i < len * 0.5) mid += val

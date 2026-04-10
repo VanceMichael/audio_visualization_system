@@ -148,4 +148,128 @@ describe('AudioStore', () => {
       expect(config.name).toBe('星空漫游')
     })
   })
+
+  describe('Loading State Management', () => {
+    it('should initialize isLoading as false', () => {
+      expect(store.isLoading).toBe(false)
+    })
+
+    it('should set isLoading to true when starting audio processing', () => {
+      store.setLoading(true)
+      expect(store.isLoading).toBe(true)
+    })
+
+    it('should set isLoading to false after audio processing completes', () => {
+      store.setLoading(true)
+      store.setLoading(false)
+      expect(store.isLoading).toBe(false)
+    })
+
+    it('should toggle isLoading correctly in sequence', () => {
+      store.setLoading(true)
+      expect(store.isLoading).toBe(true)
+      store.setLoading(false)
+      expect(store.isLoading).toBe(false)
+      store.setLoading(true)
+      expect(store.isLoading).toBe(true)
+    })
+  })
+
+  describe('Playback Progress Updates', () => {
+    it('should update currentTime accurately', () => {
+      store.setCurrentTime(1.5)
+      expect(store.currentTime).toBe(1.5)
+      store.setCurrentTime(30)
+      expect(store.currentTime).toBe(30)
+      store.setCurrentTime(120.5)
+      expect(store.currentTime).toBe(120.5)
+    })
+
+    it('should update duration accurately', () => {
+      store.setDuration(180)
+      expect(store.duration).toBe(180)
+      store.setDuration(240.5)
+      expect(store.duration).toBe(240.5)
+    })
+
+    it('should calculate progress correctly during playback', () => {
+      store.setDuration(200)
+      const times = [0, 25, 50, 100, 150, 200]
+      const expectedProgress = [0, 12.5, 25, 50, 75, 100]
+      times.forEach((time, index) => {
+        store.setCurrentTime(time)
+        expect(store.progress).toBe(expectedProgress[index])
+      })
+    })
+
+    it('should handle progress updates with floating point precision', () => {
+      store.setDuration(100)
+      store.setCurrentTime(33.333)
+      expect(store.progress).toBeCloseTo(33.333, 2)
+    })
+
+    it('should reset progress to 0 on reset', () => {
+      store.setDuration(100)
+      store.setCurrentTime(50)
+      expect(store.progress).toBe(50)
+      store.reset()
+      expect(store.progress).toBe(0)
+    })
+  })
+
+  describe('Error Handling State', () => {
+    it('should reset to initial state on invalid file', () => {
+      store.setAudioFile({ name: 'invalid.mp3' })
+      store.setPlaying(true)
+      store.setCurrentTime(30)
+      store.setDuration(100)
+      store.setLoading(true)
+      store.reset()
+      expect(store.audioFile).toBeNull()
+      expect(store.fileName).toBe('')
+      expect(store.isPlaying).toBe(false)
+      expect(store.currentTime).toBe(0)
+      expect(store.duration).toBe(0)
+      expect(store.isLoading).toBe(true)
+    })
+
+    it('should maintain isLoading state through reset', () => {
+      store.setLoading(true)
+      store.reset()
+      expect(store.isLoading).toBe(true)
+    })
+
+    it('should allow setting loading false after recovery', () => {
+      store.setLoading(true)
+      store.reset()
+      store.setLoading(false)
+      expect(store.isLoading).toBe(false)
+    })
+  })
+
+  describe('State Consistency', () => {
+    it('should maintain consistent state through multiple operations', () => {
+      store.setAudioFile({ name: 'test.mp3' })
+      store.setDuration(200)
+      for (let i = 0; i <= 100; i += 10) {
+        store.setCurrentTime(i * 2)
+        expect(store.progress).toBe(i)
+      }
+      store.setPlaying(true)
+      expect(store.isPlaying).toBe(true)
+      store.setPlaying(false)
+      expect(store.isPlaying).toBe(false)
+    })
+
+    it('should handle rapid state changes without corruption', () => {
+      for (let i = 0; i < 100; i++) {
+        store.setCurrentTime(Math.random() * 100)
+        store.setPlaying(i % 2 === 0)
+        store.setLoading(i % 3 === 0)
+      }
+      expect(typeof store.currentTime).toBe('number')
+      expect(typeof store.isPlaying).toBe('boolean')
+      expect(typeof store.isLoading).toBe('boolean')
+    })
+  })
 })

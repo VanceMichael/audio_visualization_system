@@ -264,4 +264,250 @@ describe('Visualizers', () => {
       })
     })
   })
+
+  describe('Boundary Tests - Empty and Null Data Input', () => {
+    const visualizerClasses = [
+      { name: 'WaveOcean', Class: WaveOcean },
+      { name: 'ParticleBurst', Class: ParticleBurst },
+      { name: 'StarryNight', Class: StarryNight },
+      { name: 'AuroraFlow', Class: AuroraFlow },
+      { name: 'SpectrumBars', Class: SpectrumBars }
+    ]
+
+    visualizerClasses.forEach(({ name, Class }) => {
+      describe(`${name} - No Crash on Invalid Data Input`, () => {
+        let visualizer
+
+        beforeEach(() => {
+          visualizer = new Class(mockCanvas, createMockContext())
+        })
+
+        it('should not crash on null frequencyData', () => {
+          expect(() => {
+            visualizer.render(null, waveformData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should not crash on undefined frequencyData', () => {
+          expect(() => {
+            visualizer.render(undefined, waveformData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should not crash on null waveformData', () => {
+          expect(() => {
+            visualizer.render(frequencyData, null, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should not crash on zero-length frequency array', () => {
+          const zeroLengthData = new Uint8Array(0)
+          expect(() => {
+            visualizer.render(zeroLengthData, waveformData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should not crash on single element frequency array', () => {
+          const singleData = new Uint8Array([128])
+          expect(() => {
+            visualizer.render(singleData, singleData, 0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should not crash on all null data inputs', () => {
+          expect(() => {
+            visualizer.render(null, null, 0.016, true)
+          }).not.toThrow()
+        })
+      })
+    })
+  })
+
+  describe('Boundary Tests - Extreme Frequency Data Values', () => {
+    const visualizerClasses = [
+      { name: 'WaveOcean', Class: WaveOcean },
+      { name: 'ParticleBurst', Class: ParticleBurst },
+      { name: 'StarryNight', Class: StarryNight },
+      { name: 'AuroraFlow', Class: AuroraFlow },
+      { name: 'SpectrumBars', Class: SpectrumBars }
+    ]
+
+    visualizerClasses.forEach(({ name, Class }) => {
+      describe(`${name} - Extreme Value Handling`, () => {
+        let visualizer
+
+        beforeEach(() => {
+          visualizer = new Class(mockCanvas, createMockContext())
+        })
+
+        it('should handle all frequency values at minimum (0)', () => {
+          const allZeros = new Uint8Array(1024).fill(0)
+          expect(() => {
+            for (let i = 0; i < 5; i++) {
+              visualizer.render(allZeros, allZeros, 0.016, true)
+            }
+          }).not.toThrow()
+        })
+
+        it('should handle all frequency values at maximum (255)', () => {
+          const allMax = new Uint8Array(1024).fill(255)
+          expect(() => {
+            for (let i = 0; i < 5; i++) {
+              visualizer.render(allMax, allMax, 0.016, true)
+            }
+          }).not.toThrow()
+        })
+
+        it('should handle alternating extreme values (0, 255, 0, 255...)', () => {
+          const alternating = new Uint8Array(1024)
+          for (let i = 0; i < alternating.length; i++) {
+            alternating[i] = i % 2 === 0 ? 0 : 255
+          }
+          expect(() => {
+            for (let i = 0; i < 5; i++) {
+              visualizer.render(alternating, alternating, 0.016, true)
+            }
+          }).not.toThrow()
+        })
+
+        it('should handle rapid extreme value changes across frames', () => {
+          const allZeros = new Uint8Array(1024).fill(0)
+          const allMax = new Uint8Array(1024).fill(255)
+          expect(() => {
+            for (let i = 0; i < 20; i++) {
+              const freqData = i % 2 === 0 ? allZeros : allMax
+              visualizer.render(freqData, freqData, 0.016, true)
+            }
+          }).not.toThrow()
+        })
+      })
+    })
+  })
+
+  describe('Boundary Tests - deltaTime Parameter Edge Cases', () => {
+    const visualizerClasses = [
+      { name: 'WaveOcean', Class: WaveOcean },
+      { name: 'ParticleBurst', Class: ParticleBurst },
+      { name: 'StarryNight', Class: StarryNight },
+      { name: 'AuroraFlow', Class: AuroraFlow },
+      { name: 'SpectrumBars', Class: SpectrumBars }
+    ]
+
+    visualizerClasses.forEach(({ name, Class }) => {
+      describe(`${name} - deltaTime Edge Cases`, () => {
+        let visualizer
+
+        beforeEach(() => {
+          visualizer = new Class(mockCanvas, createMockContext())
+        })
+
+        it('should handle deltaTime = 0 without crashing', () => {
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, 0, true)
+          }).not.toThrow()
+        })
+
+        it('should handle multiple consecutive deltaTime = 0 frames', () => {
+          expect(() => {
+            for (let i = 0; i < 30; i++) {
+              visualizer.render(frequencyData, waveformData, 0, true)
+            }
+          }).not.toThrow()
+        })
+
+        it('should handle negative deltaTime values', () => {
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, -0.016, true)
+          }).not.toThrow()
+        })
+
+        it('should handle very small negative deltaTime', () => {
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, -0.000001, true)
+          }).not.toThrow()
+        })
+
+        it('should handle very large positive deltaTime (10 seconds)', () => {
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, 10.0, true)
+          }).not.toThrow()
+        })
+
+        it('should handle extremely large deltaTime (1 hour)', () => {
+          expect(() => {
+            visualizer.render(frequencyData, waveformData, 3600, true)
+          }).not.toThrow()
+        })
+
+        it('should handle rapid deltaTime value fluctuations', () => {
+          const varyingDeltaTimes = [0, 0.016, -0.016, 1.0, -1.0, 100, 0, 0.001]
+          expect(() => {
+            varyingDeltaTimes.forEach(dt => {
+              visualizer.render(frequencyData, waveformData, dt, true)
+            })
+          }).not.toThrow()
+        })
+      })
+    })
+  })
+
+  describe('Boundary Tests - Combined Extreme Conditions', () => {
+    const visualizerClasses = [
+      { name: 'WaveOcean', Class: WaveOcean },
+      { name: 'ParticleBurst', Class: ParticleBurst },
+      { name: 'StarryNight', Class: StarryNight },
+      { name: 'AuroraFlow', Class: AuroraFlow },
+      { name: 'SpectrumBars', Class: SpectrumBars }
+    ]
+
+    visualizerClasses.forEach(({ name, Class }) => {
+      describe(`${name} - Combined Stress Test`, () => {
+        let visualizer
+
+        beforeEach(() => {
+          visualizer = new Class(mockCanvas, createMockContext())
+        })
+
+        it('should handle combination: null data + deltaTime=0 + not playing', () => {
+          expect(() => {
+            visualizer.render(null, null, 0, false)
+          }).not.toThrow()
+        })
+
+        it('should handle combination: max values + negative deltaTime + playing', () => {
+          const allMax = new Uint8Array(1024).fill(255)
+          expect(() => {
+            visualizer.render(allMax, allMax, -0.5, true)
+          }).not.toThrow()
+        })
+
+        it('should handle combination: min values + large deltaTime + rapid toggle play state', () => {
+          const allZeros = new Uint8Array(1024).fill(0)
+          expect(() => {
+            for (let i = 0; i < 20; i++) {
+              visualizer.render(allZeros, allZeros, 100, i % 2 === 0)
+            }
+          }).not.toThrow()
+        })
+
+        it('should survive a comprehensive chaos monkey stress test', () => {
+          const allZeros = new Uint8Array(1024).fill(0)
+          const allMax = new Uint8Array(1024).fill(255)
+          const dataOptions = [allZeros, allMax, null, undefined, new Uint8Array(0)]
+          const deltaTimeOptions = [0, 0.016, -0.016, 1, -1, 100, 3600]
+          const playOptions = [true, false]
+
+          expect(() => {
+            for (let i = 0; i < 50; i++) {
+              const freqData = dataOptions[Math.floor(Math.random() * dataOptions.length)]
+              const waveData = dataOptions[Math.floor(Math.random() * dataOptions.length)]
+              const dt = deltaTimeOptions[Math.floor(Math.random() * deltaTimeOptions.length)]
+              const playing = playOptions[Math.floor(Math.random() * playOptions.length)]
+              visualizer.render(freqData, waveData, dt, playing)
+            }
+          }).not.toThrow()
+        })
+      })
+    })
+  })
 })

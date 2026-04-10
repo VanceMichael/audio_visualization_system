@@ -27,11 +27,15 @@ export class SpectrumBars {
   }
 
   render(frequencyData, waveformData, deltaTime, isPlaying) {
+    const safeFrequencyData = frequencyData || new Uint8Array(1024)
+    const safeWaveformData = waveformData || new Uint8Array(1024)
+    const safeDeltaTime = Math.max(0, deltaTime || 0)
+    
     const ctx = this.ctx
     const centerY = this.height / 2
     
     // 基准速度乘数
-    const dtScale = deltaTime * 60
+    const dtScale = safeDeltaTime * 60
 
     // 背景
     ctx.fillStyle = '#050508'
@@ -51,8 +55,8 @@ export class SpectrumBars {
 
     // 绘制频谱柱
     for (let i = 0; i < this.barCount; i++) {
-      const freqIndex = Math.floor(Math.pow(i / this.barCount, 1.5) * frequencyData.length * 0.5)
-      const value = frequencyData[freqIndex] / 255
+      const freqIndex = Math.floor(Math.pow(i / this.barCount, 1.5) * safeFrequencyData.length * 0.5)
+      const value = safeFrequencyData[freqIndex] / 255
       const barHeight = value * maxBarHeight * (isPlaying ? 1 : 0.1)
 
       const x = padding + i * barWidth
@@ -124,7 +128,7 @@ export class SpectrumBars {
     this.updateParticles(ctx, dtScale)
 
     // 装饰
-    this.drawDecorations(ctx, frequencyData, isPlaying, centerY)
+    this.drawDecorations(ctx, safeFrequencyData, isPlaying, centerY)
   }
 
   drawGrid(ctx) {
